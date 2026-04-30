@@ -1,0 +1,143 @@
+mixed-port: 7890
+mode: rule
+unified-delay: true
+log-level: error
+ipv6: false
+external-controller: 127.0.0.1:9090
+secret: 143772bab9dfbb86
+find-process-mode: always
+global-client-fingerprint: chrome
+keep-alive-idle: 30
+keep-alive-interval: 30
+
+dns:
+  enable: true
+  prefer-h3: true
+  ipv6: false
+  use-hosts: true
+  use-system-hosts: true
+  respect-rules: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 172.19.0.1/16
+  nameserver:
+    # --- PRIORITAS ADGUARD (BLOKIR IKLAN) ---
+    - https://dns.adguard-dns.com/dns-query
+    - quic://dns.adguard-dns.com:784
+    # --- CADANGAN (STABILITAS INTERNET) ---
+    - 8.8.8.8
+    - 1.1.1.1
+    - 223.5.5.5
+  fallback:
+    - https://dns.google/dns-query
+    - https://1.1.1.1/dns-query
+  fake-ip-filter:
+    - '+.push.apple.com'
+    - '+.stun.*'
+    - 'localhost.ptlogin2.qq.com'
+    - 'WORKGROUP'
+
+tun:
+  enable: true
+  device: Clash Mi
+  stack: gvisor
+  dns-hijack:
+    - 0.0.0.0:53
+  auto-route: false
+  auto-detect-interface: false
+  mtu: 9000
+  inet4-address:
+    - 172.19.0.1/30
+
+proxies:
+  - name: ID - PT Pusat Media Indonesia [VLESS-TLS]
+    type: vless
+    server: api24-normal.tiktokv.com.redirect.benxx.workers.dev
+    port: 443
+    uuid: b5a60e4a-498b-4fb9-9988-09289404903c
+    tls: true
+    servername: api24-normal.tiktokv.com.redirect.benxx.workers.dev
+    network: ws
+    ws-opts:
+      path: /103.6.207.108-8080
+      headers:
+        host: api24-normal.tiktokv.com.redirect.benxx.workers.dev
+  - name: xcp
+    type: vless
+    server: 172.66.1.232
+    port: 443
+    uuid: 2bcfbfba-b446-4ad5-93ad-72af9e008f61
+    tls: true
+    servername: api24-normal.tiktokv.com.hu.xinquins.dpdns.org
+    network: ws
+    ws-opts:
+      path: /43.218.77.16-1443
+      headers:
+        host: api24-normal.tiktokv.com.hu.xinquins.dpdns.org
+  - name: 'Netflix '
+    type: vless
+    server: redirect-1.benxx.workers.dev
+    port: 443
+    uuid: 2bcfbfba-b446-4ad5-93ad-72af9e008f61
+    tls: true
+    servername: redirect-1.benxx.workers.dev
+    network: ws
+    ws-opts:
+      path: /47.74.254.191-8900
+      headers:
+        host: redirect-1.benxx.workers.dev
+
+proxy-groups:
+  - name: 🚀 Benxx Project
+    type: select
+    proxies:
+      - ⚡ Auto Select
+      - ID - PT Pusat Media Indonesia [VLESS-TLS]
+      - xcp
+      - 'Netflix '
+      - DIRECT
+
+  - name: ⚡ Auto Select
+    type: url-test
+    proxies:
+      - ID - PT Pusat Media Indonesia [VLESS-TLS]
+      - xcp
+      - 'Netflix '
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+
+  - name: 🛑 Ad Blocking
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+      - 🚀 Benxx Project
+
+  - name: 🎬 Streaming
+    type: select
+    proxies:
+      - 🚀 Benxx Project
+      - 'Netflix '
+      - DIRECT
+
+rule-providers:
+  category-ads-all:
+    type: http
+    format: mrs
+    behavior: domain
+    url: https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ads-all.mrs
+    path: ./ruleset/category-ads-all.mrs
+    interval: 86400
+  netflix:
+    type: http
+    format: mrs
+    behavior: domain
+    url: https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs
+    path: ./ruleset/netflix.mrs
+    interval: 86400
+
+rules:
+  # Iklan diproses paling awal untuk di-REJECT
+  - RULE-SET,category-ads-all,🛑 Ad Blocking
+  - RULE-SET,netflix,🎬 Streaming
+  - GEOIP,google,🚀 Benxx Project
+  - MATCH,🚀 Benxx Project
