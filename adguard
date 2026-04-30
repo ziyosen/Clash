@@ -7,8 +7,6 @@ external-controller: 127.0.0.1:9090
 secret: 143772bab9dfbb86
 find-process-mode: always
 global-client-fingerprint: chrome
-keep-alive-idle: 30
-keep-alive-interval: 30
 
 dns:
   enable: true
@@ -20,21 +18,21 @@ dns:
   enhanced-mode: fake-ip
   fake-ip-range: 172.19.0.1/16
   nameserver:
-    # --- PRIORITAS ADGUARD (BLOKIR IKLAN) ---
+    # --- ADGUARD (UTAMA) ---
     - https://dns.adguard-dns.com/dns-query
     - quic://dns.adguard-dns.com:784
-    # --- CADANGAN (STABILITAS INTERNET) ---
+    # --- GOOGLE & CLOUDFLARE (BACKUP INTERNET) ---
     - 8.8.8.8
     - 1.1.1.1
-    - 223.5.5.5
   fallback:
     - https://dns.google/dns-query
     - https://1.1.1.1/dns-query
   fake-ip-filter:
+    - 'moviehub.xinquins.dpdns.org'
+    - '*.vercel.app'
+    - 'vercel.com'
     - '+.push.apple.com'
     - '+.stun.*'
-    - 'localhost.ptlogin2.qq.com'
-    - 'WORKGROUP'
 
 tun:
   enable: true
@@ -45,8 +43,6 @@ tun:
   auto-route: false
   auto-detect-interface: false
   mtu: 9000
-  inet4-address:
-    - 172.19.0.1/30
 
 proxies:
   - name: ID - PT Pusat Media Indonesia [VLESS-TLS]
@@ -112,13 +108,6 @@ proxy-groups:
       - DIRECT
       - 🚀 Benxx Project
 
-  - name: 🎬 Streaming
-    type: select
-    proxies:
-      - 🚀 Benxx Project
-      - 'Netflix '
-      - DIRECT
-
 rule-providers:
   category-ads-all:
     type: http
@@ -127,17 +116,14 @@ rule-providers:
     url: https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/category-ads-all.mrs
     path: ./ruleset/category-ads-all.mrs
     interval: 86400
-  netflix:
-    type: http
-    format: mrs
-    behavior: domain
-    url: https://gh-proxy.com/https://github.com/MetaCubeX/meta-rules-dat/raw/refs/heads/meta/geo/geosite/netflix.mrs
-    path: ./ruleset/netflix.mrs
-    interval: 86400
 
 rules:
-  # Iklan diproses paling awal untuk di-REJECT
+  # Agar API Movie Hub tidak Error
+  - DOMAIN-SUFFIX,vercel.app,DIRECT
+  - DOMAIN,moviehub.xinquins.dpdns.org,DIRECT
+  
+  # Iklan diblokir setelahnya
   - RULE-SET,category-ads-all,🛑 Ad Blocking
-  - RULE-SET,netflix,🎬 Streaming
+  
   - GEOIP,google,🚀 Benxx Project
   - MATCH,🚀 Benxx Project
