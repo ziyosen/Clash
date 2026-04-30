@@ -18,23 +18,21 @@ dns:
   enhanced-mode: fake-ip
   fake-ip-range: 172.19.0.1/16
   nameserver:
-    # --- ADGUARD (UTAMA UNTUK BLOKIR DNS LEVEL) ---
     - https://dns.adguard-dns.com/dns-query
     - quic://dns.adguard-dns.com:784
-    # --- GOOGLE & CLOUDFLARE (BACKUP) ---
     - 8.8.8.8
     - 1.1.1.1
   fallback:
     - https://dns.google/dns-query
     - https://1.1.1.1/dns-query
   fake-ip-filter:
-    # Whitelist agar tidak menggunakan Fake-IP pada domain krusial
+    - 'apil-fy3l.vercel.app' # Domain API kamu wajib di sini
     - 'moviehub.xinquins.dpdns.org'
     - '*.vercel.app'
     - 'vercel.com'
+    - '+.xinquins.dpdns.org'
     - '+.push.apple.com'
     - '+.stun.*'
-    - '+.xinquins.dpdns.org'
 
 tun:
   enable: true
@@ -42,7 +40,7 @@ tun:
   stack: gvisor
   dns-hijack:
     - 0.0.0.0:53
-  auto-route: true # Diubah ke true agar otomatis menangkap trafik jika di Android/PC
+  auto-route: true
   auto-detect-interface: true
   mtu: 9000
 
@@ -119,7 +117,8 @@ rule-providers:
     interval: 86400
 
 rules:
-  # --- [1] BYPASS / WHITELIST (Agar API tidak Error) ---
+  # --- [1] BYPASS / WHITELIST (Prioritas Paling Atas) ---
+  - DOMAIN,apil-fy3l.vercel.app,DIRECT
   - DOMAIN-SUFFIX,vercel.app,DIRECT
   - DOMAIN-SUFFIX,vercel.com,DIRECT
   - DOMAIN-KEYWORD,xinquins,DIRECT
